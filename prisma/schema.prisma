@@ -1,0 +1,269 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model activity_logs {
+  id          String    @id @db.VarChar(64)
+  admin_id    String    @db.VarChar(64)
+  admin_name  String    @db.VarChar(128)
+  admin_email String    @db.VarChar(128)
+  action      String    @db.VarChar(128)
+  entity_type String    @db.VarChar(64)
+  entity_id   String?   @db.VarChar(64)
+  details     String
+  ip_address  String?   @db.VarChar(64)
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model admin_users {
+  id            String    @id @db.VarChar(64)
+  name          String    @db.VarChar(128)
+  email         String    @unique @db.VarChar(128)
+  password_hash String
+  role_id       String    @db.VarChar(64)
+  role_name     String    @db.VarChar(64)
+  status        String    @default("ACTIVE") @db.VarChar(32)
+  avatar_url    String?
+  last_login_at DateTime? @db.Timestamp(6)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model categories {
+  id            String    @id @db.VarChar(64)
+  name          String    @db.VarChar(128)
+  slug          String    @unique @db.VarChar(128)
+  tagline       String?
+  icon          String?   @db.VarChar(64)
+  package_count Int?      @default(0)
+  gradient      String?
+  accent_color  String?   @db.VarChar(32)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model cms_content {
+  id          String    @id @db.VarChar(64)
+  section_key String    @unique @db.VarChar(64)
+  title       String    @db.VarChar(255)
+  subtitle    String?
+  content     String
+  image_url   String?
+  metadata    String?
+  updated_by  String    @db.VarChar(128)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model contact_messages {
+  id         String    @id @db.VarChar(64)
+  name       String    @db.VarChar(128)
+  email      String    @db.VarChar(128)
+  phone      String?   @db.VarChar(32)
+  city       String?   @db.VarChar(64)
+  occasion   String?   @db.VarChar(64)
+  message    String
+  status     String    @default("NEW") @db.VarChar(32)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model coupons {
+  id                  String    @id @db.VarChar(64)
+  code                String    @unique @db.VarChar(32)
+  description         String?
+  discount_type       String    @default("PERCENTAGE") @db.VarChar(32)
+  discount_value      Decimal   @db.Decimal(10, 2)
+  min_order_value     Decimal?  @default(0.00) @db.Decimal(10, 2)
+  max_discount_amount Decimal?  @db.Decimal(10, 2)
+  usage_limit         Int?      @default(100)
+  usage_count         Int?      @default(0)
+  start_date          String    @db.VarChar(32)
+  expiry_date         String    @db.VarChar(32)
+  is_active           Boolean?  @default(true)
+  created_at          DateTime? @default(now()) @db.Timestamp(6)
+  updated_at          DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model customers {
+  id           String    @id @db.VarChar(64)
+  name         String    @db.VarChar(128)
+  email        String    @unique @db.VarChar(128)
+  phone        String    @db.VarChar(32)
+  status       String?   @default("ACTIVE") @db.VarChar(32)
+  total_orders Int?      @default(0)
+  total_spent  Decimal?  @default(0.00) @db.Decimal(12, 2)
+  city         String?   @db.VarChar(64)
+  address      String?
+  pincode      String?   @db.VarChar(16)
+  notes        String?
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model deliveries {
+  id                      String    @id @db.VarChar(64)
+  order_id                String    @db.VarChar(64)
+  order_number            String    @db.VarChar(64)
+  customer_name           String    @db.VarChar(128)
+  customer_phone          String    @db.VarChar(32)
+  recipient_name          String    @db.VarChar(128)
+  recipient_phone         String    @db.VarChar(32)
+  delivery_address        String
+  city                    String    @db.VarChar(64)
+  pincode                 String    @db.VarChar(16)
+  delivery_date           String    @db.VarChar(32)
+  delivery_time_slot      String    @db.VarChar(64)
+  assigned_presenter_id   String?   @db.VarChar(64)
+  assigned_presenter_name String?   @db.VarChar(128)
+  status                  String    @default("UNASSIGNED") @db.VarChar(32)
+  notes                   String?
+  completed_at            DateTime? @db.Timestamp(6)
+  created_at              DateTime? @default(now()) @db.Timestamp(6)
+  updated_at              DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model notifications {
+  id              String    @id @db.VarChar(64)
+  title           String    @db.VarChar(255)
+  body            String
+  target_audience String?   @default("ALL_CUSTOMERS") @db.VarChar(64)
+  recipient_id    String?   @db.VarChar(64)
+  sent_by         String    @db.VarChar(128)
+  status          String?   @default("SENT") @db.VarChar(32)
+  sent_at         DateTime? @default(now()) @db.Timestamp(6)
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model orders {
+  id                   String    @id @db.VarChar(64)
+  order_number         String    @unique @db.VarChar(64)
+  customer_id          String    @db.VarChar(64)
+  customer_name        String    @db.VarChar(128)
+  customer_email       String    @db.VarChar(128)
+  customer_phone       String    @db.VarChar(32)
+  recipient_name       String    @db.VarChar(128)
+  recipient_phone      String    @db.VarChar(32)
+  delivery_address     String
+  city                 String    @db.VarChar(64)
+  pincode              String    @db.VarChar(16)
+  landmark             String?
+  delivery_date        String    @db.VarChar(32)
+  delivery_time_slot   String    @db.VarChar(64)
+  occasion             String    @db.VarChar(64)
+  presenter_required   Boolean?  @default(true)
+  presenter_note       String?
+  special_instructions String?
+  items                String
+  subtotal             Decimal   @db.Decimal(10, 2)
+  addons_total         Decimal?  @default(0.00) @db.Decimal(10, 2)
+  delivery_fee         Decimal?  @default(0.00) @db.Decimal(10, 2)
+  discount_amount      Decimal?  @default(0.00) @db.Decimal(10, 2)
+  total_amount         Decimal   @db.Decimal(10, 2)
+  status               String    @default("CONFIRMED") @db.VarChar(32)
+  payment_status       String    @default("PAID") @db.VarChar(32)
+  payment_method       String?   @default("Razorpay") @db.VarChar(32)
+  assigned_staff_id    String?   @db.VarChar(64)
+  assigned_staff_name  String?   @db.VarChar(128)
+  internal_notes       String?
+  timeline             String
+  created_at           DateTime? @default(now()) @db.Timestamp(6)
+  updated_at           DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model packages {
+  id                String    @id @db.VarChar(64)
+  slug              String    @unique @db.VarChar(128)
+  title             String    @db.VarChar(255)
+  name              String?   @db.VarChar(255)
+  occasion          String    @db.VarChar(64)
+  occasion_label    String    @db.VarChar(64)
+  category          String    @db.VarChar(128)
+  tagline           String
+  price             Decimal   @db.Decimal(10, 2)
+  original_price    Decimal?  @db.Decimal(10, 2)
+  compare_at_price  Decimal?  @db.Decimal(10, 2)
+  rating            Decimal?  @default(5.0) @db.Decimal(3, 2)
+  review_count      Int?      @default(0)
+  popular           Boolean?  @default(false)
+  featured          Boolean?  @default(false)
+  is_featured       Boolean?  @default(false)
+  is_active         Boolean?  @default(true)
+  badge             String?   @db.VarChar(64)
+  short_description String
+  description       String
+  highlights        String
+  inclusions        String
+  features          String
+  addons            String
+  duration          String?   @default("30-45 Mins") @db.VarChar(64)
+  image_theme       String?   @default("rose") @db.VarChar(32)
+  visual_icon       String?   @default("Cake") @db.VarChar(64)
+  image             String?
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  updated_at        DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model products {
+  id             String    @id @db.VarChar(64)
+  name           String    @db.VarChar(255)
+  category       String    @db.VarChar(64)
+  price          Decimal   @db.Decimal(10, 2)
+  cost_price     Decimal?  @db.Decimal(10, 2)
+  sku            String    @unique @db.VarChar(64)
+  stock_quantity Int?      @default(100)
+  is_available   Boolean?  @default(true)
+  description    String?
+  image_url      String?
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model reviews {
+  id             String    @id @db.VarChar(64)
+  order_id       String?   @db.VarChar(64)
+  package_id     String?   @db.VarChar(64)
+  package_name   String?   @db.VarChar(128)
+  customer_name  String    @db.VarChar(128)
+  customer_email String    @db.VarChar(128)
+  rating         Int       @default(5)
+  title          String    @db.VarChar(255)
+  comment        String
+  status         String?   @default("APPROVED") @db.VarChar(32)
+  is_featured    Boolean?  @default(true)
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model roles {
+  id          String    @id @db.VarChar(64)
+  name        String    @unique @db.VarChar(64)
+  description String?
+  is_system   Boolean?  @default(false)
+  permissions String
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model store_settings {
+  id                      String    @id @default("main") @db.VarChar(32)
+  business_name           String    @default("Happiness Deliver") @db.VarChar(128)
+  brand_tagline           String?   @default("Premium Surprise Gifting & Doorstep Delivery") @db.VarChar(255)
+  helpline_phone          String?   @default("+91 98765 43210") @db.VarChar(32)
+  helpline_email          String?   @default("hello@happinessdeliver.com") @db.VarChar(128)
+  address                 String?   @default("100 Executive Boulevard, Suite 400")
+  city                    String?   @default("Mumbai") @db.VarChar(64)
+  state                   String?   @default("Maharashtra") @db.VarChar(64)
+  pincode                 String?   @default("400001") @db.VarChar(16)
+  currency_symbol         String?   @default("₹") @db.VarChar(8)
+  tax_rate_percent        Decimal?  @default(18.00) @db.Decimal(5, 2)
+  default_delivery_fee    Decimal?  @default(0.00) @db.Decimal(8, 2)
+  free_delivery_threshold Decimal?  @default(1000.00) @db.Decimal(10, 2)
+  order_prefix            String?   @default("HD-") @db.VarChar(16)
+  allow_same_day_booking  Boolean?  @default(true)
+  booking_cutoff_time     String?   @default("18:00") @db.VarChar(16)
+  auto_assign_presenters  Boolean?  @default(false)
+  updated_at              DateTime? @default(now()) @db.Timestamp(6)
+}
